@@ -117,8 +117,6 @@ jobs:
         AZURE_CONTAINER_REGISTRY: ${{ env.AZURE_CONTAINER_REGISTRY }}
         CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
         IMAGE_TAG: ${{ github.sha }}
-      run: |
-        cat kubernetes/*.yml
 
     # Deploys application based on given manifest file
     - name: Deploys application
