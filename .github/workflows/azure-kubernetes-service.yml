@@ -36,8 +36,6 @@ jobs:
     # Builds and pushes an image up to your Azure Container Registry
     - name: Build and push image to ACR
       run: |
-        ls -a
-        pwd
         az acr build --image ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }} --registry ${{ env.AZURE_CONTAINER_REGISTRY }} -g ${{ env.RESOURCE_GROUP }} .
 
   createSecret:
@@ -119,6 +117,8 @@ jobs:
         AZURE_CONTAINER_REGISTRY: ${{ env.AZURE_CONTAINER_REGISTRY }}
         CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
         IMAGE_TAG: ${{ github.sha }}
+      run: |
+        cat kubernetes/*.yml
 
     # Deploys application based on given manifest file
     - name: Deploys application
