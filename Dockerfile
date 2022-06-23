@@ -1,4 +1,4 @@
-FROM smkth/smkth_base_container
+FROM smkth/base-container
 LABEL maintainer="nchunhas@siammakro.co.th"
 COPY *.jar /home/appbin/TALEND/container/deploy/.
 EXPOSE 8096
