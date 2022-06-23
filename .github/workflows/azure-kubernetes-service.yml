@@ -1,31 +1,3 @@
-# This workflow will build and push an application to a Azure Kubernetes Service (AKS) cluster when you push your code
-#
-# This workflow assumes you have already created the target AKS cluster and have created an Azure Container Registry (ACR)
-# For instructions see:
-#   - https://docs.microsoft.com/en-us/azure/aks/kubernetes-walkthrough-portal
-#   - https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal
-#   - https://github.com/Azure/aks-create-action
-#
-# To configure this workflow:
-#
-# 1. Set the following secrets in your repository (instructions for getting these can be found at https://docs.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-cli%2Clinux):
-#    - AZURE_CLIENT_ID
-#    - AZURE_TENANT_ID
-#    - AZURE_SUBSCRIPTION_ID
-#
-# 2. Set the following environment variables (or replace the values below):
-#    - AZURE_CONTAINER_REGISTRY (name of your container registry / ACR)
-#    - RESOURCE_GROUP (where your cluster is deployed)
-#    - CLUSTER_NAME (name of your AKS cluster)
-#    - CONTAINER_NAME (name of the container image you would like to push up to your ACR)
-#    - IMAGE_PULL_SECRET_NAME (name of the ImagePullSecret that will be created to pull your ACR image)
-#    - DEPLOYMENT_MANIFEST_PATH (path to the manifest yaml for your deployment)
-#
-# For more information on GitHub Actions for Azure, refer to https://github.com/Azure/Actions
-# For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
-# For more options with the actions used below please refer to https://github.com/Azure/login
-# test
-
 name: Build and deploy an app to AKS
 
 on:
@@ -40,6 +12,7 @@ env:
   RESOURCE_GROUP: "SPOKE-RG-AKSCluster"
   CLUSTER_NAME: "DTSAKSCluster"
   IMAGE_PULL_SECRET_NAME: "acr-access-secret"
+  NAMESPACE: "pipeline-poc"
   DEPLOYMENT_MANIFEST_PATH: '../../'
 
 jobs:
@@ -134,14 +107,22 @@ jobs:
       with:
         resource-group: ${{ env.RESOURCE_GROUP }}
         cluster-name: ${{ env.CLUSTER_NAME }}
+        
+    - name: Replace ENV in file
+      uses: cschleiden/replace-tokens@v1
+      with:
+        files: '["kubernetes/*.yml"]'
+        tokenPrefix: __
+        tokenSuffix: __
+      env:
+        NAMESPACE: ${{ env.NAMESPACE }}
+        AZURE_CONTAINER_REGISTRY: ${{ env.AZURE_CONTAINER_REGISTRY }}
+        CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+        IMAGE_TAG: ${{ github.sha }}
 
     # Deploys application based on given manifest file
     - name: Deploys application
       uses: Azure/k8s-deploy@v3.1
       with:
-        action: deploy
-        manifests: ${{ env.DEPLOYMENT_MANIFEST_PATH }}
-        images: |
-          ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }}
-        imagepullsecrets: |
-          ${{ env.IMAGE_PULL_SECRET_NAME }}
+        manifests: |
+          kubernetes/gatewaypayment-deployment.yml
