@@ -36,7 +36,7 @@ on:
 
 env:
   AZURE_CONTAINER_REGISTRY: "DTSPrivateRegistry"
-  CONTAINER_NAME: "your-container-name"
+  CONTAINER_NAME: "gw-payment-health"
   RESOURCE_GROUP: "SPOKE-RG-AKSCluster"
   CLUSTER_NAME: "DTSAKSCluster"
   IMAGE_PULL_SECRET_NAME: "acr-access-secret"
